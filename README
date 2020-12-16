@@ -6,6 +6,18 @@ nickfelix@nfnovo:~/docker-xeyes-gui$ xhost +local:0.0.0.0
 non-network local connections being added to access control list
 nickfelix@nfnovo:~/docker-xeyes-gui$ ./run.sh 
 
+nickfelix@nfnovo:~/docker-xeyes-gui$ ls
+Dockerfile  Makefile.sh  README  run.sh
+nickfelix@nfnovo:~/docker-xeyes-gui$ cat Dockerfile 
+FROM ubuntu
+RUN apt update && apt install -y x11-apps  #xeyes
+CMD ["/usr/bin/xeyes"]
+nickfelix@nfnovo:~/docker-xeyes-gui$ cat Makefile.sh 
+sudo docker build -t gui-app .
+nickfelix@nfnovo:~/docker-xeyes-gui$ cat run.sh 
+sudo docker run --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" gui-app
+nickfelix@nfnovo:~/docker-xeyes-gui$ 
+
 
 Running GUI Applications inside Docker Containers
 Saravanan Sundaramoorthy
