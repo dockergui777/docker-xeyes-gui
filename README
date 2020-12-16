@@ -6,3 +6,109 @@ nickfelix@nfnovo:~/docker-xeyes-gui$ xhost +local:0.0.0.0
 non-network local connections being added to access control list
 nickfelix@nfnovo:~/docker-xeyes-gui$ ./run.sh 
 
+
+Running GUI Applications inside Docker Containers
+Saravanan Sundaramoorthy
+Saravanan Sundaramoorthy
+Feb 5, 2018·3 min read
+Image for post
+
+While the IT world is embracing Containers Technology primarily for Enterprise Server Applications, There is also a huge scope of Docker Containers impacting the Desktop and Development Environment. We leverage this heavily at Admatic, where we containerise every application and service we use — further including the GUI applications and tools that we use for Day to day Development — what took us days is now just a second away. :)
+
+If we want to switch to Deep Learning Dev environment — its 1 Click, If we want Android Dev Env — its just another 1 sec away, Need to integrate Computer vision Algorithms with JNI wrappers for Android NDK Integration with TensorFlow Models — Boom!, just a sec away.
+
+I repeat, what took us few days is now just a second away :)
+
+Want to setup a similar Wow Dev environment at your Office, Get in touch!
+
+Thanks to Docker Containers that is revolutionising the current DevOps landscape and we plan to revolutionise the current development environment landscape with the same.
+
+Here will share you how to Containerise a GUI app in Docker
+
+There can be two types of applications (usually services) that you can containerise,
+
+    Applications that run as a Background Service (like a Database, WebServer, etc)
+    GUI Applications that (obviously!) run in the foreground
+
+The second option is what we will see now,
+
+For a GUI Application to run, we need to have a XServer which is available as part of every Linux Desktop Environment, But within a Container we don’t have any XServer — so we will
+
+    share the Host’s XServer with the Container by creating a volume
+    --volume="$HOME/.Xauthority:/root/.Xauthority:rw"
+    share the Host’s DISPLAY environment variable to the Container
+    --env="DISPLAY"
+    run container with host network driver with
+    --net=host
+
+Use this Dockerfile to build an image with a sample GUI application for testing,
+
+$ cat Dockerfile
+
+FROM centos
+RUN yum install -y xeyes
+CMD ["/usr/bin/xeyes"]
+
+$ sudo docker build -t gui-app .
+
+$ sudo docker run --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" gui-app
+
+You should see the xeyes GUI application now displayed on your Host OS Desktop.
+
+Now lets build Android Studio Docker Image with,
+
+$ sudo docker build -t android-studio .
+
+$ cat Dockerfile
+
+FROM ubuntu:14.04
+MAINTAINER Admatic Engineering Team@ADMATIC.INENV DEBIAN_FRONTEND=noninteractiveRUN apt-get update# Default jdk
+RUN apt-get install -y default-jdk# 32-bit dependencies of android and utils
+RUN apt-get install -y \
+    bison \
+    git \
+    gperf \
+    lib32gcc1 \
+    lib32bz2-1.0 \
+    lib32ncurses5 \
+    lib32stdc++6 \
+    lib32z1 \
+    libc6-i386 \
+    libxml2-utils \
+    make \
+    zip# Download and unzip Android Studio for Linux
+ADD http://dl.google.com/dl/android/studio/ide-zips/1.2.1.1/android-studio-ide-141.1903250-linux.zip /opt/android-studio.zip
+RUN cd /opt/ && unzip android-studio.zip && rm android-studio.zipCMD /opt/android-studio/bin/studio.sh
+
+This will start Android Studio running from inside Container.
+
+$ sudo docker run --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" android-studio
+
+There are much more interesting things we can do on top of this, Currently this will need Linux Host to run, How about getting this GUI app running on a Windows OS? Mac OS?
+
+We will see that in another post.
+
+God is Great!
+
+Written by
+Saravanan Sundaramoorthy
+Curious Learning Machine + Founder & CEO @AdmaticCloud @RoboticKitchen God is Great! More you give, more++ you get.
+
+    Docker
+    Linux
+    Kubernetes
+    Docker Swarm
+
+More from Saravanan Sundaramoorthy
+Curious Learning Machine + Founder & CEO @AdmaticCloud @RoboticKitchen God is Great! More you give, more++ you get.
+Feb 3, 2018
+Admatic Tech Blog: Starting Multiple Services inside a Container with Supervisord
+Image for post
+
+While its important to note that containers are supposed to be light-weight and meant to run only one service or process ideally.
+
+Sometimes the application we need to containerise may need to depend on other processes / services to be already started — thats where supervisord comes into picture.
+
+While in Dockerfile we can mention the default service or process with CMD or ENTRYPOINT instructions, which lets you to start only one process.
+
+We can still write a smart shell script to cheat the Docker system, by running multiple processes spawned from the shell script — still it is a effort thats not professional. …
